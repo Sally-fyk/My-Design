@@ -16,7 +16,7 @@ def ListFilesToTxt(dir,file,wildcard,recursion):
 def Test():
   dir="/home/sally/test"
   outfile="binaries.txt"
-  wildcard = ".jpg"
+  wildcard = ".jpg" #change the file type if you want
  
   file = open(outfile,"w")
   if not file:
