@@ -31,8 +31,10 @@ class fc7SequenceGenerator(SequenceGenerator):
     for imgid_file, poolfeatfile, sentfile in filenames:
       print 'Reading features from file: %s' % poolfeatfile
       with open(imgid_file, 'r') as infd:
-        image_ids = infd.read().splitlines()
-      self.image_ids = dict.fromkeys(image_ids, 1)
+        for image_ids in infd:
+            image_ids = image_ids.split('\t')
+            image_ids = image_ids[1]
+            self.image_ids = dict.fromkeys(image_ids, 1)
       with open(poolfeatfile, 'rb') as poolfd:
         # each line has the fc7 mean of 1 video
         for line in poolfd:
@@ -55,9 +57,9 @@ class fc7SequenceGenerator(SequenceGenerator):
               num_empty_lines += 1
               continue
             #labels = id_sent[1].split(',')
-            if id_sent[0] in self.image_ids:
-              self.vid_labels[id_sent[0]] = id_sent[1]
-              self.lines.append((id_sent[0], id_sent[1]))
+            if id_sent[1] in self.image_ids:
+              self.vid_labels[id_sent[1]] = id_sent[0]
+              self.lines.append((id_sent[1], id_sent[0]))
       print 'lines: %d ' % len(self.lines)
       if num_empty_lines > 0:
         print 'Warning: ignoring %d empty lines.' % num_empty_lines
@@ -166,9 +168,9 @@ OUTPUT_BASIS_DIR = '{0}/hdf5/buffer_{1}_only8newobj_label72k_{2}'.format(SETTING
 VIDEO_STREAMS, MAX_FRAMES)
 VOCAB = './surf_intersect_glove.txt'
 OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
-POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
-LABEL_FILE_PATTERN = 'data/coco2014/rmEightCoco1.txt'
-IMAGEID_FILE_PATTERN='data/coco2014/Imagenet.txt'
+POOLFEAT_FILE_PATTERN = 'data/coco2014/Imagenet_{0}_vgg_fc7.txt'
+LABEL_FILE_PATTERN = 'data/coco2014/test_imagenet_images.txt'
+IMAGEID_FILE_PATTERN='data/coco2014/test_imagenet_images.txt'
 # IMAGEID_FILE_PATTERN='data/coco2014/coco_rm8objs_image_list_train2014.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
@@ -191,7 +193,7 @@ def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned
 def process_splits():
   DATASETS = [ # split_name, data_split_name, aligned
       # ('valid', 'mytest', True),
-      ('train', 'trainvallstm', False),
+      ('train', 'train', False),
       # ('test', 'test', False),
   ]
   for split_name, data_split_name, aligned in DATASETS:
