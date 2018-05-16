@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 4096d image fc7 + text labels to hdf
+# text sentences to hdf
 
 import numpy as np
 import os
@@ -61,6 +61,7 @@ class fc7SequenceGenerator(SequenceGenerator):
               self.lines.append((img_id, id_sent[1]))
         if num_empty_lines > 0:
           print 'Warning: ignoring %d empty lines.' % num_empty_lines
+'''
       for labelfile in label_files:
         print 'Reading labels in: %s' % labelfile
         with open(labelfile, 'r') as sentfd:
@@ -73,6 +74,7 @@ class fc7SequenceGenerator(SequenceGenerator):
             #labels = id_sent[1].split(',')
             if id_sent[0] in self.image_ids:
               self.vid_labels[id_sent[0]] = id_sent[1]
+'''
     self.line_index = 0
     self.num_resets = 0
     self.num_truncates = 0
@@ -326,14 +328,14 @@ class TextSequenceGenerator(SequenceGenerator):
     self.num_outs += 1
     out = {}
     # add an extra item in the beginning
-    out['cont_sentence'] = [0] + [1] * len(stream) + [0] * pad
+    out['txt_only_cont_sentence'] = [0] + [1] * len(stream) + [0] * pad
     # 0 pad inputs not -1
-    out['input_sentence'] = [0] + stream + [0] * pad
-    out['target_sequence'] = stream + [0] + [-1] * pad
+    out['txt_only_input_sentence'] = [0] + stream + [0] * pad
+    out['txt_only_target_sequence'] = stream + [0] + [-1] * pad
     # out['target_sentence'] = stream + [0] + [-1] * pad
-    output_length = len(out['input_sentence'])
-    assert len(out['cont_sentence']) == output_length
-    assert len(out['target_sequence']) == output_length
+    output_length = len(out['txt_only_input_sentence'])
+    assert len(out['txt_only_cont_sentence']) == output_length
+    assert len(out['txt_only_target_sequence']) == output_length
     self.next_line()
     return out
 
@@ -342,19 +344,18 @@ VIDEO_STREAMS = 1
 BUFFER_SIZE = 32 # TEXT streams
 BATCH_STREAM_LENGTH = 1000 # (21 * 50)
 SETTING = 'data/coco2014'
-# OUTPUT_BASIS_DIR = '{0}/hdf5/buffer_{1}_rm8obj_label72k_{2}'.format(SETTING,
-OUTPUT_BASIS_DIR = '{0}/hdf5/buffer_{1}_rm8newobj_label72k_{2}'.format(SETTING,
-VIDEO_STREAMS, MAX_FRAMES)
-# OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_rm8obj_label72k_{2}'.format(SETTING, BUFFER_SIZE, MAX_WORDS)
-OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_rm8newobj_label72k_{2}'.format(SETTING, BUFFER_SIZE, MAX_WORDS)
+#OUTPUT_BASIS_DIR = '{0}/hdf5/buffer_{1}_rm8obj_label72k_{2}'.format(SETTING,
+#VIDEO_STREAMS, MAX_FRAMES)
+# OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8obj_sents72k_{2}'.format(SETTING, BUFFER_SIZE, MAX_WORDS)
+OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8newobj_sents72k_{2}'.format(SETTING, BUFFER_SIZE, MAX_WORDS)
 VOCAB = './surf_intersect_glove.txt'
-OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
+#OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
 OUTPUT_TEXT_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_TEXT_DIR
 POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
 SENTS_FILE_PATTERN = 'data/coco2014/sents/coco_sentences_{0}_tokens.txt'
 LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_{0}.txt' #train2014
-# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_rm8objs_image_list_{0}.txt'
-IMAGEID_FILE_PATTERN = 'data/coco2014/cvpr17_rm8newobjs/coco_rm8newobjs_image_list_{0}.txt'
+# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_only8objs_image_list_{0}.txt'
+IMAGEID_FILE_PATTERN='data/coco2014/cvpr17_rm8newobjs/coco_only8newobjs_image_list_train2014.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
   if split_name == 'train':
@@ -376,15 +377,15 @@ def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned
   filenames = [(imgid_file, feat_files, sent_files, label_file)]
 
   vocab_filename = VOCAB
-  output_basis_path = OUTPUT_BASIS_DIR_PATTERN % split_name
+  #output_basis_path = OUTPUT_BASIS_DIR_PATTERN % split_name
   aligned = True
   fsg = fc7SequenceGenerator(filenames, vocab_filename, VIDEO_STREAMS,
          max_frames=MAX_FRAMES, align=aligned, shuffle=True, pad=aligned,
          truncate=aligned)
   fsg.batch_stream_length = batch_stream_length
-  writer = HDF5SequenceWriter(fsg, output_dir=output_basis_path)
-  writer.write_to_exhaustion()
-  writer.write_filelists()
+  #writer = HDF5SequenceWriter(fsg, output_dir=output_basis_path)
+  #writer.write_to_exhaustion()
+  #writer.write_filelists()
   output_text_path = OUTPUT_TEXT_DIR_PATTERN % split_name
   fsg_lines = fsg.lines
   tsg = TextSequenceGenerator(fsg_lines, vocab_filename, BUFFER_SIZE,
@@ -398,8 +399,8 @@ def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned
 
 def process_splits():
   DATASETS = [ # split_name, data_split_name, aligned
-      ('valid', 'mytest', True),
-      # ('train', 'trainvallstm', True),
+      #('valid', 'mytest', True),
+      ('train', 'trainvallstm', True),
       # ('test', 'test', False),
   ]
   for split_name, data_split_name, aligned in DATASETS:
