@@ -43,9 +43,9 @@ class fc7SequenceGenerator(SequenceGenerator):
           if img_id in self.image_ids:
             if img_id not in self.vid_poolfeats:
               self.vid_poolfeats[img_id]=[]
-            self.vid_poolfeats[img_id].append(line)
+              self.vid_poolfeats[img_id].append(line)
       # reset max_words based on maximum frames in the video
-      if os.path.exists(sentfile):
+      if os.path.exists(sentfile): 
         print 'Reading labels in: %s' % sentfile
         with open(sentfile, 'r') as sentfd:
           for line in sentfd:
@@ -58,6 +58,7 @@ class fc7SequenceGenerator(SequenceGenerator):
             if id_sent[0] in self.image_ids:
               self.vid_labels[id_sent[0]] = id_sent[1]
               self.lines.append((id_sent[0], id_sent[1]))
+      print 'lines: %d ' % len(self.lines)
       if num_empty_lines > 0:
         print 'Warning: ignoring %d empty lines.' % num_empty_lines
     self.line_index = 0
@@ -98,7 +99,7 @@ class fc7SequenceGenerator(SequenceGenerator):
     for line in vocab_filedes.readlines():
       split_line = line.split()
       word = split_line[0]
-      print word
+      # print word
       #if unicode(word) == UNK_IDENTIFIER:
       if word == UNK_IDENTIFIER:
         continue
@@ -115,6 +116,7 @@ class fc7SequenceGenerator(SequenceGenerator):
 
   def next_line(self):
     num_lines = float(len(self.lines))
+    print "num_lines : %s" %num_lines
     if self.line_index == 1 or self.line_index == num_lines or self.line_index % 10000 == 0:
       print 'Processed %d/%d (%f%%) lines' % (self.line_index, num_lines,
                                               100 * self.line_index / num_lines)
@@ -165,9 +167,9 @@ VIDEO_STREAMS, MAX_FRAMES)
 VOCAB = './surf_intersect_glove.txt'
 OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
 POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
-LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_train2014.txt'
-# IMAGEID_FILE_PATTERN='data/coco2014/coco_only8objs_image_list_train2014.txt'
-IMAGEID_FILE_PATTERN='data/coco2014/cvpr17_rm8newobjs/coco_only8newobjs_image_list_train2014.txt'
+LABEL_FILE_PATTERN = 'data/coco2014/rmEightCoco1.txt'
+IMAGEID_FILE_PATTERN='data/coco2014/Imagenet.txt'
+# IMAGEID_FILE_PATTERN='data/coco2014/coco_rm8objs_image_list_train2014.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
   filenames = [(IMAGEID_FILE_PATTERN,
