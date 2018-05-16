@@ -40,11 +40,14 @@ class fc7SequenceGenerator(SequenceGenerator):
             line = line.strip()
             id_feat = line.split(',')
             img_id = id_feat[0]
+            img_id = img_id.lstrip('0')
             line = ','.join(id_feat[1:])
             if img_id in self.image_ids:
               if img_id not in self.vid_poolfeats:
                 self.vid_poolfeats[img_id]=[]
               self.vid_poolfeats[img_id].append(line)
+            else:
+              print ('%s is not in' %img_id)
 
       for sentfile in sentfiles:
         print 'Reading sentences in: %s' % sentfile
@@ -52,29 +55,14 @@ class fc7SequenceGenerator(SequenceGenerator):
           for line in sentfd:
             line = line.strip()
             id_sent = line.split('\t')
-            assert len(id_sent)==2
             if len(id_sent)<2:
               num_empty_lines += 1
               continue
-            img_id = id_sent[0].split('#')[0]
+            img_id = id_sent[0]
             if img_id in self.image_ids:
               self.lines.append((img_id, id_sent[1]))
         if num_empty_lines > 0:
           print 'Warning: ignoring %d empty lines.' % num_empty_lines
-'''
-      for labelfile in label_files:
-        print 'Reading labels in: %s' % labelfile
-        with open(labelfile, 'r') as sentfd:
-          for line in sentfd:
-            line = line.strip()
-            id_sent = line.split('\t')
-            if len(id_sent)<2:
-              num_empty_lines += 1
-              continue
-            #labels = id_sent[1].split(',')
-            if id_sent[0] in self.image_ids:
-              self.vid_labels[id_sent[0]] = id_sent[1]
-'''
     self.line_index = 0
     self.num_resets = 0
     self.num_truncates = 0
@@ -180,15 +168,18 @@ class fc7SequenceGenerator(SequenceGenerator):
   # we have pooled fc7 features already in the file
   def get_streams(self):
     vidid, line = self.lines[self.line_index]
+#    print(vidid)
+#    print(self.lines[0])
+#    print(self.vid_poolfeats[vidid])
     assert vidid in self.vid_poolfeats
     text_mean_fc7 = self.vid_poolfeats[vidid][0] # list inside dict
     mean_fc7 = self.float_line_to_stream(text_mean_fc7)
-    labels = self.labels_to_values(self.vid_labels[vidid])
+#    labels = self.labels_to_values(self.vid_labels[vidid])
 
     self.num_outs += 1
     out = {}
     out['mean_fc7'] = np.array(mean_fc7).reshape(1, len(mean_fc7))
-    out['labels'] = labels
+#    out['labels'] = labels
     self.next_line()
     return out
 
@@ -234,7 +225,7 @@ class TextSequenceGenerator(SequenceGenerator):
     for line in vocab_filedes.readlines():
       split_line = line.split()
       word = split_line[0]
-      print word
+      # print word
       #if unicode(word) == UNK_IDENTIFIER:
       if word == UNK_IDENTIFIER:
         continue
@@ -352,11 +343,11 @@ OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_rm8newobj_label72k_{2}'.format(SETTING, B
 VOCAB = './surf_intersect_glove.txt'
 OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
 OUTPUT_TEXT_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_TEXT_DIR
-POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
-SENTS_FILE_PATTERN = 'data/coco2014/id_captions_val_val.txt'
+POOLFEAT_FILE_PATTERN = 'data/coco2014/output_features_val.txt'
+SENTS_FILE_PATTERN = 'data/coco2014/id_captions_val.txt'
 LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_{0}.txt' #train2014
 # IMAGEID_FILE_PATTERN = 'data/coco2014/coco_rm8objs_image_list_{0}.txt'
-IMAGEID_FILE_PATTERN = 'data/coco2014/coco2014_cocoid.val_val.txt'
+IMAGEID_FILE_PATTERN = 'data/coco2014/coco2014_cocoid.val.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
   if split_name == 'train':
