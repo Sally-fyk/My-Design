@@ -122,7 +122,7 @@ class fc7SequenceGenerator(SequenceGenerator):
     for line in vocab_filedes.readlines():
       split_line = line.split()
       word = split_line[0]
-      print word
+#     print word
       #if unicode(word) == UNK_IDENTIFIER:
       if word == UNK_IDENTIFIER:
         continue
@@ -353,10 +353,10 @@ VOCAB = './surf_intersect_glove.txt'
 OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
 OUTPUT_TEXT_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_TEXT_DIR
 POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
-SENTS_FILE_PATTERN = 'data/coco2014/sents/coco_sentences_{0}_tokens.txt'
+SENTS_FILE_PATTERN = 'data/coco2014/id_captions_val_val.txt'
 LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_{0}.txt' #train2014
 # IMAGEID_FILE_PATTERN = 'data/coco2014/coco_rm8objs_image_list_{0}.txt'
-IMAGEID_FILE_PATTERN = 'data/coco2014/cvpr17_rm8newobjs/coco_rm8newobjs_image_list_{0}.txt'
+IMAGEID_FILE_PATTERN = 'data/coco2014/coco2014_cocoid.val_val.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
   if split_name == 'train':
