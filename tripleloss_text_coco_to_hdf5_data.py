@@ -61,6 +61,7 @@ class fc7SequenceGenerator(SequenceGenerator):
               self.lines.append((img_id, id_sent[1]))
         if num_empty_lines > 0:
           print 'Warning: ignoring %d empty lines.' % num_empty_lines
+'''
       for labelfile in label_files:
         print 'Reading labels in: %s' % labelfile
         with open(labelfile, 'r') as sentfd:
@@ -73,6 +74,7 @@ class fc7SequenceGenerator(SequenceGenerator):
             #labels = id_sent[1].split(',')
             if id_sent[0] in self.image_ids:
               self.vid_labels[id_sent[0]] = id_sent[1]
+'''
     self.line_index = 0
     self.num_resets = 0
     self.num_truncates = 0
