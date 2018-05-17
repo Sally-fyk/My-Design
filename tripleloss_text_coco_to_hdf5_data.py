@@ -52,7 +52,6 @@ class fc7SequenceGenerator(SequenceGenerator):
           for line in sentfd:
             line = line.strip()
             id_sent = line.split('\t')
-            assert len(id_sent)==2
             if len(id_sent)<2:
               num_empty_lines += 1
               continue
@@ -330,7 +329,7 @@ class TextSequenceGenerator(SequenceGenerator):
 VIDEO_STREAMS = 1
 BUFFER_SIZE = 32 # TEXT streams
 BATCH_STREAM_LENGTH = 1000 # (21 * 50)
-SETTING = 'data/coco2014'
+SETTING = '/mnt/fyk/data/coco2014'
 #OUTPUT_BASIS_DIR = '{0}/hdf5/buffer_{1}_rm8obj_label72k_{2}'.format(SETTING,
 #VIDEO_STREAMS, MAX_FRAMES)
 # OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8obj_sents72k_{2}'.format(SETTING, BUFFER_SIZE, MAX_WORDS)
@@ -338,11 +337,11 @@ OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8newobj_sents72k_{2}'.format(SETTING,
 VOCAB = './surf_intersect_glove.txt'
 #OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
 OUTPUT_TEXT_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_TEXT_DIR
-POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
-SENTS_FILE_PATTERN = 'data/coco2014/sents/coco_sentences_{0}_tokens.txt'
+POOLFEAT_FILE_PATTERN = 'data/coco2014/output_features_val.txt'
+SENTS_FILE_PATTERN = 'data/coco2014/id_captions_val_val.txt'
 LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_{0}.txt' #train2014
-# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_only8objs_image_list_{0}.txt'
-IMAGEID_FILE_PATTERN='data/coco2014/cvpr17_rm8newobjs/coco_only8newobjs_image_list_train2014.txt'
+# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_rm8objs_image_list_{0}.txt'
+IMAGEID_FILE_PATTERN = 'data/coco2014/coco2014_cocoid.val_val.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
   if split_name == 'train':
