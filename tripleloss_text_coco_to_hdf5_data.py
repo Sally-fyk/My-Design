@@ -61,20 +61,7 @@ class fc7SequenceGenerator(SequenceGenerator):
               self.lines.append((img_id, id_sent[1]))
         if num_empty_lines > 0:
           print 'Warning: ignoring %d empty lines.' % num_empty_lines
-'''
-      for labelfile in label_files:
-        print 'Reading labels in: %s' % labelfile
-        with open(labelfile, 'r') as sentfd:
-          for line in sentfd:
-            line = line.strip()
-            id_sent = line.split('\t')
-            if len(id_sent)<2:
-              num_empty_lines += 1
-              continue
-            #labels = id_sent[1].split(',')
-            if id_sent[0] in self.image_ids:
-              self.vid_labels[id_sent[0]] = id_sent[1]
-'''
+
     self.line_index = 0
     self.num_resets = 0
     self.num_truncates = 0
@@ -183,12 +170,12 @@ class fc7SequenceGenerator(SequenceGenerator):
     assert vidid in self.vid_poolfeats
     text_mean_fc7 = self.vid_poolfeats[vidid][0] # list inside dict
     mean_fc7 = self.float_line_to_stream(text_mean_fc7)
-    labels = self.labels_to_values(self.vid_labels[vidid])
+    # labels = self.labels_to_values(self.vid_labels[vidid])
 
     self.num_outs += 1
     out = {}
     out['mean_fc7'] = np.array(mean_fc7).reshape(1, len(mean_fc7))
-    out['labels'] = labels
+    # out['labels'] = labels
     self.next_line()
     return out
 
