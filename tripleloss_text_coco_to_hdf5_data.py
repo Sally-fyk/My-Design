@@ -52,6 +52,7 @@ class fc7SequenceGenerator(SequenceGenerator):
           for line in sentfd:
             line = line.strip()
             id_sent = line.split('\t')
+            assert len(id_sent)==2
             if len(id_sent)<2:
               num_empty_lines += 1
               continue
@@ -60,7 +61,18 @@ class fc7SequenceGenerator(SequenceGenerator):
               self.lines.append((img_id, id_sent[1]))
         if num_empty_lines > 0:
           print 'Warning: ignoring %d empty lines.' % num_empty_lines
-
+      for labelfile in label_files:
+        print 'Reading labels in: %s' % labelfile
+        with open(labelfile, 'r') as sentfd:
+          for line in sentfd:
+            line = line.strip()
+            id_sent = line.split('\t')
+            if len(id_sent)<2:
+              num_empty_lines += 1
+              continue
+            #labels = id_sent[1].split(',')
+            if id_sent[0] in self.image_ids:
+              self.vid_labels[id_sent[0]] = id_sent[1]
     self.line_index = 0
     self.num_resets = 0
     self.num_truncates = 0
@@ -169,12 +181,12 @@ class fc7SequenceGenerator(SequenceGenerator):
     assert vidid in self.vid_poolfeats
     text_mean_fc7 = self.vid_poolfeats[vidid][0] # list inside dict
     mean_fc7 = self.float_line_to_stream(text_mean_fc7)
-    # labels = self.labels_to_values(self.vid_labels[vidid])
+    labels = self.labels_to_values(self.vid_labels[vidid])
 
     self.num_outs += 1
     out = {}
     out['mean_fc7'] = np.array(mean_fc7).reshape(1, len(mean_fc7))
-    # out['labels'] = labels
+    out['labels'] = labels
     self.next_line()
     return out
 
@@ -329,7 +341,7 @@ class TextSequenceGenerator(SequenceGenerator):
 VIDEO_STREAMS = 1
 BUFFER_SIZE = 32 # TEXT streams
 BATCH_STREAM_LENGTH = 1000 # (21 * 50)
-SETTING = '/mnt/fyk/data/coco2014'
+SETTING = 'data/coco2014'
 #OUTPUT_BASIS_DIR = '{0}/hdf5/buffer_{1}_rm8obj_label72k_{2}'.format(SETTING,
 #VIDEO_STREAMS, MAX_FRAMES)
 # OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8obj_sents72k_{2}'.format(SETTING, BUFFER_SIZE, MAX_WORDS)
@@ -337,11 +349,11 @@ OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8newobj_sents72k_{2}'.format(SETTING,
 VOCAB = './surf_intersect_glove.txt'
 #OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
 OUTPUT_TEXT_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_TEXT_DIR
-POOLFEAT_FILE_PATTERN = 'data/coco2014/output_features_val.txt'
-SENTS_FILE_PATTERN = 'data/coco2014/id_captions_val_val.txt'
+POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
+SENTS_FILE_PATTERN = 'data/coco2014/sents/coco_sentences_{0}_tokens.txt'
 LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_{0}.txt' #train2014
-# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_rm8objs_image_list_{0}.txt'
-IMAGEID_FILE_PATTERN = 'data/coco2014/coco2014_cocoid.val_val.txt'
+# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_only8objs_image_list_{0}.txt'
+IMAGEID_FILE_PATTERN='data/coco2014/cvpr17_rm8newobjs/coco_only8newobjs_image_list_train2014.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
   if split_name == 'train':
@@ -393,4 +405,4 @@ def process_splits():
     preprocess_dataset(split_name, data_split_name, BATCH_STREAM_LENGTH,aligned)
 
 if __name__ == "__main__":
-  process_splits()
+process_splits()
