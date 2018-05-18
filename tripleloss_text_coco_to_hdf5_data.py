@@ -52,7 +52,6 @@ class fc7SequenceGenerator(SequenceGenerator):
           for line in sentfd:
             line = line.strip()
             id_sent = line.split('\t')
-            assert len(id_sent)==2
             if len(id_sent)<2:
               num_empty_lines += 1
               continue
@@ -120,7 +119,7 @@ class fc7SequenceGenerator(SequenceGenerator):
     for line in vocab_filedes.readlines():
       split_line = line.split()
       word = split_line[0]
-      print word
+      # print word
       #if unicode(word) == UNK_IDENTIFIER:
       if word == UNK_IDENTIFIER:
         continue
@@ -166,7 +165,7 @@ class fc7SequenceGenerator(SequenceGenerator):
   """label_list: line with "," separated list of positive labels
      return: list of 0/1s dim:#lexical labels, 1 for +ve"""
   def labels_to_values(self, label_list):
-    pos_labels = label_list.split(',')
+    pos_labels = label_list.split(' ')
     label_arr = np.zeros((1, len(self.vocabulary)+1))
     label_indices = [self.vocabulary[label]+1 for label in pos_labels]
     label_arr[0, label_indices] = 1
@@ -177,6 +176,7 @@ class fc7SequenceGenerator(SequenceGenerator):
 
   # we have pooled fc7 features already in the file
   def get_streams(self):
+    self.next_line()
     vidid, line = self.lines[self.line_index]
     assert vidid in self.vid_poolfeats
     text_mean_fc7 = self.vid_poolfeats[vidid][0] # list inside dict
@@ -341,7 +341,7 @@ class TextSequenceGenerator(SequenceGenerator):
 VIDEO_STREAMS = 1
 BUFFER_SIZE = 32 # TEXT streams
 BATCH_STREAM_LENGTH = 1000 # (21 * 50)
-SETTING = 'data/coco2014'
+SETTING = '/mnt/fyk/data/data/coco2014'
 #OUTPUT_BASIS_DIR = '{0}/hdf5/buffer_{1}_rm8obj_label72k_{2}'.format(SETTING,
 #VIDEO_STREAMS, MAX_FRAMES)
 # OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8obj_sents72k_{2}'.format(SETTING, BUFFER_SIZE, MAX_WORDS)
@@ -349,21 +349,22 @@ OUTPUT_TEXT_DIR = '{0}/hdf5/buffer_{1}_only8newobj_sents72k_{2}'.format(SETTING,
 VOCAB = './surf_intersect_glove.txt'
 #OUTPUT_BASIS_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_BASIS_DIR
 OUTPUT_TEXT_DIR_PATTERN = '%s/%%s_batches' % OUTPUT_TEXT_DIR
-POOLFEAT_FILE_PATTERN = 'data/coco2014/coco2014_{0}_vgg_fc7.txt'
-SENTS_FILE_PATTERN = 'data/coco2014/sents/coco_sentences_{0}_tokens.txt'
-LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_{0}.txt' #train2014
-# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_only8objs_image_list_{0}.txt'
-IMAGEID_FILE_PATTERN='data/coco2014/cvpr17_rm8newobjs/coco_only8newobjs_image_list_train2014.txt'
+POOLFEAT_FILE_PATTERN = '/mnt/fyk/data/output_features_{0}.txt'
+SENTS_FILE_PATTERN = 'data/coco2014/id_captions_{0}.txt'
+LABEL_FILE_PATTERN = 'data/coco2014/id_captions_{0}.txt'
+# LABEL_FILE_PATTERN = 'data/coco2014/sents/labels_glove72k_{0}.txt' #train2014
+# IMAGEID_FILE_PATTERN = 'data/coco2014/coco_rm8objs_image_list_{0}.txt'
+IMAGEID_FILE_PATTERN = 'data/coco2014/coco2014_cocoid.{0}.txt'
 
 def preprocess_dataset(split_name, data_split_name, batch_stream_length, aligned=False):
   if split_name == 'train':
     imgid_file = IMAGEID_FILE_PATTERN.format('train2014')
-    feat_files = [POOLFEAT_FILE_PATTERN.format('trainvallstm')]
+    feat_files = [POOLFEAT_FILE_PATTERN.format('train2014')]
     sent_files = [SENTS_FILE_PATTERN.format('train2014')]
     label_file = [LABEL_FILE_PATTERN.format('train2014')]
   elif split_name == 'valid':
     imgid_file = IMAGEID_FILE_PATTERN.format('val2014')
-    feat_files = [POOLFEAT_FILE_PATTERN.format('trainvallstm'),
+    feat_files = [POOLFEAT_FILE_PATTERN.format('train2014'),
                   POOLFEAT_FILE_PATTERN.format('mytest')]
     sent_files = [SENTS_FILE_PATTERN.format('trainvallstm'),
                   SENTS_FILE_PATTERN.format('mytest')]
@@ -405,4 +406,4 @@ def process_splits():
     preprocess_dataset(split_name, data_split_name, BATCH_STREAM_LENGTH,aligned)
 
 if __name__ == "__main__":
-process_splits()
+  process_splits()
